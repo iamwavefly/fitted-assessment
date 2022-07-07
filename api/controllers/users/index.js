@@ -15,6 +15,13 @@ exports.newUser = asyncHandler(async (req, res) => {
       message: "user name and password are required",
     });
   }
+  // protect super admin account
+  if (role === "superAdmin") {
+    return res.status(403).json({
+      statusCode: "02",
+      message: "role superAdmin not allowed",
+    });
+  }
   try {
     // check if user exist
     const userWithEmail = await UserSchema.findOne({ email });
@@ -133,4 +140,66 @@ exports.getUsers = asyncHandler(async (req, res) => {
       message: errorHandler(error),
     });
   }
+});
+
+// fetch specific user
+exports.getUser = asyncHandler(async (req, res) => {
+  // get user id from parameter
+  const { id } = req.params;
+  // check if user id passed
+  if (!id) {
+    return res.status(400).json({
+      statusCode: "00",
+      message: "user id required",
+    });
+  }
+
+  try {
+    // fetch user
+    const user = await UserSchema.findById(id);
+    // check for user
+    if (!user) {
+      return res.status(400).json({
+        statusCode: "01",
+        message: "No user found",
+      });
+    }
+    //   return user
+    res.status(201).json({
+      statusCode: "00",
+      data: user,
+    });
+  } catch (error) {
+    // send error details
+    res.status(400).json({
+      statusCode: "02",
+      message: errorHandler(error),
+    });
+  }
+});
+
+// fetch users
+exports.removeUser = asyncHandler(async (req, res) => {
+  // get user id from parameter
+  const { id } = req.params;
+  // check if user id passed
+  if (!id) {
+    return res.status(400).json({
+      statusCode: "00",
+      message: "User id required",
+    });
+  }
+  // remove tasks
+  UserSchema.deleteOne({ _id: id }, (error, data) => {
+    if (error) {
+      return res.status(400).json({
+        statusCode: "02",
+        message: errorHandler(error),
+      });
+    }
+    res.status(200).json({
+      statusCode: "00",
+      message: "User deleted",
+    });
+  });
 });

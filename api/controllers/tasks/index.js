@@ -114,7 +114,7 @@ exports.getTask = asyncHandler(async (req, res) => {
     if (!task) {
       return res.status(400).json({
         statusCode: "01",
-        message: "No tasks found",
+        message: "No task found",
       });
     }
     //   return task
